@@ -1,22 +1,16 @@
-use std::{fs::OpenOptions, io::Write, path::PathBuf};
+use std::{
+    fs::{File, OpenOptions, create_dir_all},
+    io::Write,
+    path::PathBuf,
+};
 
 use anyhow::{Context, Result};
-use bytemuck::{Pod, Zeroable};
 use csv::ReaderBuilder;
-use serde::Deserialize;
-#[repr(C)]
-#[derive(Debug, Deserialize, Pod, Zeroable, Copy, Clone)]
-struct Candle {
-    timestamp: i64,
-    open: f64,
-    close: f64,
-    high: f64,
-    low: f64,
-    volume: f64,
-}
-const PROCESSED_FILE_NAME: &str = "output/conv.bin";
 
-pub fn conv_from_csv_to_bin(filename: PathBuf) -> Result<()> {
+use crate::common::{Candle, PROCESSED_FILE_NAME};
+
+pub fn conv_from_csv_to_bin(filename: PathBuf) -> Result<File> {
+    create_dir_all("output").with_context(|| "could not create output directory")?;
     let file = OpenOptions::new()
         .read(true)
         .create(false)
@@ -24,6 +18,7 @@ pub fn conv_from_csv_to_bin(filename: PathBuf) -> Result<()> {
         .with_context(|| format!("{} does not exists", filename.display()))?;
     let mut write_file = OpenOptions::new()
         .write(true)
+        .read(true)
         .create(true)
         .truncate(true)
         .open(PROCESSED_FILE_NAME)
@@ -41,5 +36,5 @@ pub fn conv_from_csv_to_bin(filename: PathBuf) -> Result<()> {
         filename.file_name().unwrap().display(),
         PROCESSED_FILE_NAME
     );
-    Ok(())
+    Ok(write_file)
 }
