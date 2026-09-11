@@ -1,0 +1,11 @@
+[package]
+name = "bitcoin_analyser"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+bytemuck = {version="1.25.2",features=["derive"]}
+csv = "1.4.0"
+memmap2 = "0.9.11"
+serde = {version="1.0.229",features=["derive"]}
